@@ -8,6 +8,8 @@
 | Newtonsoft `$type` 字符串，包括工程数据、节点列表、台词数据列表、角色记录列表、Guid 列表和整数列表 | `D:\文档\GitHub\HaloCue\script2aap.py`，常量 `T_PROJ`、`T_NODES`、`T_ENTRY`、`T_SNODE`、`T_EXIT`、`T_SLIST`、`T_SCRIPT`、`T_CLIST`、`T_CHAR`、`T_GLIST`、`T_ILIST` | 已验证 |
 | 工程包裹结构，以及入口节点 -> 台词节点 -> 出口节点的图结构 | `D:\文档\GitHub\HaloCue\script2aap.py`，`wrap_project` | 已验证 |
 | 入口节点 Guid 全为 0 | `D:\文档\GitHub\HaloCue\script2aap.py`，`wrap_project` | 已验证 |
+| v1 节点图严格线性：入口节点 -> 一个或多个台词节点 -> 出口节点 | `D:\文档\GitHub\HaloCue\script2aap.py`，`wrap_project` 按顺序生成节点和后继；M0.1 契约测试锁定 | 已验证 |
+| 每个台词节点必须包含非空 Scripts 列表 | `D:\文档\GitHub\HaloCue\script2aap.py`，`wrap_project` 写入 `Scripts`；M0.1 契约测试锁定 | 已验证 |
 | 场景 Guid 规则 | `D:\文档\GitHub\HaloCue\script2aap.py`，`uuid.uuid5(NS, f"{project}/scene/{i}")` | AAPForge v1 采用的已验证规则 |
 | 配音 Guid 规则 | `D:\文档\GitHub\HaloCue\script2aap.py`，`voice_guid(project, n)` | AAPForge v1 采用的已验证规则 |
 | 出口节点和出口内嵌配音 Guid 规则 | `D:\文档\GitHub\HaloCue\script2aap.py`，`wrap_project` | AAPForge v1 采用的已验证规则 |
