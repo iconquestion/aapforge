@@ -721,6 +721,10 @@ def main() -> None:
 
     rows = decode_character_table(blob)
 
+    for row in rows:
+        if row["id"] == "???":
+            print(row)
+
     if not rows:
         raise SystemExit(
             "ScenarioCharacterNameExcel "

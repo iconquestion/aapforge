@@ -83,13 +83,27 @@ py -3 -m pip install ".[extract]"
 
 ## 事实边界
 
+`NameKR` 在 `ScenarioCharacterNameExcel` 中是剧情角色的标识字段，而不是绝对唯一、
+稳定的真实人物 identity。对普通记录，它可用于聚合同一逻辑角色；但真实官方数据
+中存在 `"???"` 这样的 placeholder identifier，表示匿名/隐藏身份占位，不应被视为
+稳定唯一角色 identity。
+
 `ScenarioCharacterNameExcel` 能证明角色标识符、官方显示名称、官方多行记录、
 社团、Spine 路径是否至少存在、头像路径、`native_key` 和 `shape`。它不能证明
 faceId，因此 `faces` 必须保持为空，`portrait_verified` 必须保持 `false`。
 
-同一个角色标识符出现多条官方行时，全部保存到 `records`。这里不叫 `variants`，
+同一个正常角色标识符出现多条官方行时，全部保存到 `records`。这里不叫 `variants`，
 因为当前只能证明“官方表有多条记录”，还不能证明每条都等价于 AAPForge 可选择的
 立绘变体。
+
+已知的 placeholder identifier（当前仅处理 `"???"`）不进入正常 `characters` 聚合，
+也不进入 `name_index`。这些记录仍是有效官方事实，因此保存在单独的
+`unresolved_records` 中，完整保留每条 FlatData 原始字段：`id`、`name`、
+`native_key`、`shape`、`club`、`spine`、`avatar`。不根据 `spine` / `avatar` 猜测真实
+角色身份，也不把 `"???"` 和 `"？？？"` 做 Unicode 等价合并。
+
+`records` 统计只统计正常角色 `characters[*].records` 的总数；`unresolved_records`
+是单独统计字段，避免把 placeholder 的有效官方事实混入正常角色计数。
 
 `club` 保存在每条 `records` 中，不提升到角色顶层。当前没有充分证据证明同一个
 角色标识符的全部官方记录一定拥有相同社团。
@@ -104,6 +118,10 @@ any(bool(record["spine"]) for record in records)
 `avatar_available` 之类的能力字段。
 
 ## 名称歧义
+
+正常 identifier 仍采用严格一致性规则：同一 `id` 允许相同 `name` 的多条记录聚合，
+但不同 `name` 仍然抛错。placeholder `"???"` 不走这个规则，直接进入
+`unresolved_records`。`name_index` 仅覆盖正常角色，不能包含 placeholder。
 
 `name_index` 是一对多索引：
 

@@ -124,6 +124,58 @@ def test_same_display_name_for_multiple_identifiers_is_ambiguous_not_error():
     assert output["ambiguous_names"] == {"店員": ["id-a", "id-b"]}
 
 
+def test_placeholder_identifier_records_stay_unresolved_and_out_of_name_index():
+    output = build_official_character_data(
+        rows=[
+            {
+                "id": "???",
+                "name": "???",
+                "native_key": 2746145574,
+                "shape": 3,
+                "club": "",
+                "spine": "",
+                "avatar": "UIs/01_Common/01_Character/NPC_Portrait_Null",
+            },
+            {
+                "id": "???",
+                "name": "？？？",
+                "native_key": 901123296,
+                "shape": 3,
+                "club": "",
+                "spine": "UIs/03_Scenario/02_Character/CharacterSpine_CH0228",
+                "avatar": "UIs/01_Common/01_Character/Student_Portrait_CH0228",
+            },
+        ],
+        source=_source(),
+    )
+
+    assert output["characters"] == []
+    assert output["name_index"] == {}
+    assert output["ambiguous_names"] == {}
+    assert output["unresolved_records"] == [
+        {
+            "id": "???",
+            "name": "？？？",
+            "native_key": 901123296,
+            "shape": 3,
+            "club": "",
+            "spine": "UIs/03_Scenario/02_Character/CharacterSpine_CH0228",
+            "avatar": "UIs/01_Common/01_Character/Student_Portrait_CH0228",
+        },
+        {
+            "id": "???",
+            "name": "???",
+            "native_key": 2746145574,
+            "shape": 3,
+            "club": "",
+            "spine": "",
+            "avatar": "UIs/01_Common/01_Character/NPC_Portrait_Null",
+        },
+    ]
+    assert output["stats"]["unresolved_records"] == 2
+    assert output["stats"]["records"] == 0
+
+
 def test_output_is_stable_across_input_order():
     rows = [
         _row(identifier="b", name="乙", native_key=2, club="ClubB"),

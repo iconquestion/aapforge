@@ -9,6 +9,7 @@ from typing import Any
 
 OFFICIAL_CHARACTER_TABLE = "ScenarioCharacterNameExcel"
 OFFICIAL_EVIDENCE_SOURCE = "aa:ScenarioCharacterNameExcel"
+PLACEHOLDER_CHARACTER_IDS = {"???"}
 
 
 class AaOfficialDataError(ValueError):
@@ -20,12 +21,18 @@ def normalize_character_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]
 
     if not isinstance(rows, list):
         raise AaOfficialDataError("官方角色原始记录必须是数组")
+    if not rows:
+        raise AaOfficialDataError("ScenarioCharacterNameExcel 没有有效角色记录")
+
     grouped: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for index, row in enumerate(rows):
         normalized = _normalize_row(row, index)
+        if normalized["id"] in PLACEHOLDER_CHARACTER_IDS:
+            continue
         grouped[normalized["id"]].append(normalized)
+
     if not grouped:
-        raise AaOfficialDataError("ScenarioCharacterNameExcel 没有有效角色记录")
+        return []
 
     characters = []
     for identifier in sorted(grouped):
@@ -77,6 +84,43 @@ def normalize_character_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]
     return characters
 
 
+def build_unresolved_records(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """保留已知 placeholder identifier 的官方记录，但不构建稳定角色 identity。"""
+
+    if not isinstance(rows, list):
+        raise AaOfficialDataError("官方角色原始记录必须是数组")
+
+    unresolved: list[dict[str, Any]] = []
+    for index, row in enumerate(rows):
+        normalized = _normalize_row(row, index)
+        if normalized["id"] not in PLACEHOLDER_CHARACTER_IDS:
+            continue
+        unresolved.append(
+            {
+                "id": normalized["id"],
+                "name": normalized["name"],
+                "native_key": normalized["native_key"],
+                "shape": normalized["shape"],
+                "club": normalized["club"],
+                "spine": normalized["spine"],
+                "avatar": normalized["avatar"],
+            }
+        )
+
+    return sorted(
+        unresolved,
+        key=lambda item: (
+            item["native_key"],
+            item["shape"],
+            item["club"],
+            item["spine"],
+            item["avatar"],
+            item["id"],
+            item["name"],
+        ),
+    )
+
+
 def build_name_index(characters: list[dict[str, Any]]) -> dict[str, list[str]]:
     index: dict[str, list[str]] = defaultdict(list)
     for character in characters:
@@ -97,6 +141,7 @@ def build_official_character_data(
     """构建正式的 AA 官方角色事实数据。"""
 
     characters = normalize_character_rows(rows)
+    unresolved_records = build_unresolved_records(rows)
     name_index = build_name_index(characters)
     ambiguous_names = build_ambiguous_names(name_index)
     records_count = sum(len(character["records"]) for character in characters)
@@ -104,6 +149,7 @@ def build_official_character_data(
         "schema_version": "1.0",
         "source": _normalize_source(source),
         "characters": characters,
+        "unresolved_records": unresolved_records,
         "name_index": name_index,
         "ambiguous_names": ambiguous_names,
         "stats": {
@@ -111,6 +157,7 @@ def build_official_character_data(
             "records": records_count,
             "names": len(name_index),
             "ambiguous_names": len(ambiguous_names),
+            "unresolved_records": len(unresolved_records),
         },
     }
 
