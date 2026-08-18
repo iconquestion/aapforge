@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/aapforge/core-tables.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "transitions",
+    "bg_effects",
+    "emoticons",
+    "actions",
+    "appears",
+    "shapes",
+    "hashes"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "transitions": { "$ref": "#/$defs/intMap" },
+    "bg_effects": { "$ref": "#/$defs/intMap" },
+    "emoticons": { "$ref": "#/$defs/intMap" },
+    "actions": { "$ref": "#/$defs/intMap" },
+    "appears": { "$ref": "#/$defs/intMap" },
+    "shapes": { "$ref": "#/$defs/intMap" },
+    "hashes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["background"],
+      "properties": {
+        "background": { "const": "xxHash32:utf8:seed0" }
+      }
+    }
+  },
+  "$defs": {
+    "intMap": {
+      "type": "object",
+      "propertyNames": { "minLength": 1 },
+      "additionalProperties": { "type": "integer" }
+    }
+  }
+}

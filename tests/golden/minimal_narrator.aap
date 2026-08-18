@@ -1,0 +1,254 @@
+{
+  "$type": "ProjectData, Assembly-CSharp",
+  "ProjectName": "Smoke",
+  "PreviewBgName": 1047754314,
+  "PreviewHeader": null,
+  "PreviewTitle": null,
+  "nodes": {
+    "$type": "System.Collections.Generic.List`1[[NodeData, Assembly-CSharp]], mscorlib",
+    "$values": [
+      {
+        "$type": "EntryNodeData, Assembly-CSharp",
+        "Title": null,
+        "Header": null,
+        "Guid": "00000000-0000-0000-0000-000000000000",
+        "ConnectionsTo": {
+          "$type": "System.Collections.Generic.List`1[[System.Guid, mscorlib]], mscorlib",
+          "$values": [
+            "e7812056-cfd7-5654-83dc-b312bec3f91f"
+          ]
+        },
+        "X": 0.0,
+        "Y": 0.0
+      },
+      {
+        "$type": "ScriptNodeData, Assembly-CSharp",
+        "Scripts": {
+          "$type": "System.Collections.Generic.List`1[[ScriptData, Assembly-CSharp]], mscorlib",
+          "$values": [
+            {
+              "$type": "ScriptData, Assembly-CSharp",
+              "text": "Hello",
+              "popup": "",
+              "bgEffect": 0,
+              "bgName": 1047754314,
+              "bgFriendlyName": "BG_Black",
+              "sound": "",
+              "voice": "87057a17-30b6-5bd4-be80-15f2f9ad846a",
+              "transition": 0,
+              "bgmId": 999,
+              "selectionGroup": 0,
+              "additionalPrompt": "",
+              "characters": {
+                "$type": "System.Collections.Generic.List`1[[ScriptData+CharacterRecordData, Assembly-CSharp]], mscorlib",
+                "$values": [
+                  {
+                    "$type": "ScriptData+CharacterRecordData, Assembly-CSharp",
+                    "name": "",
+                    "faceId": "00",
+                    "startingPos": 0,
+                    "endingPos": 0,
+                    "emoticon": -1,
+                    "action": 0,
+                    "effect": 0,
+                    "appear": 0,
+                    "shapeOverride": 0
+                  },
+                  {
+                    "$type": "ScriptData+CharacterRecordData, Assembly-CSharp",
+                    "name": "",
+                    "faceId": "00",
+                    "startingPos": 0,
+                    "endingPos": 0,
+                    "emoticon": -1,
+                    "action": 0,
+                    "effect": 0,
+                    "appear": 0,
+                    "shapeOverride": 0
+                  },
+                  {
+                    "$type": "ScriptData+CharacterRecordData, Assembly-CSharp",
+                    "name": "",
+                    "faceId": "00",
+                    "startingPos": 0,
+                    "endingPos": 0,
+                    "emoticon": -1,
+                    "action": 0,
+                    "effect": 0,
+                    "appear": 0,
+                    "shapeOverride": 0
+                  },
+                  {
+                    "$type": "ScriptData+CharacterRecordData, Assembly-CSharp",
+                    "name": "",
+                    "faceId": "00",
+                    "startingPos": 0,
+                    "endingPos": 0,
+                    "emoticon": -1,
+                    "action": 0,
+                    "effect": 0,
+                    "appear": 0,
+                    "shapeOverride": 0
+                  },
+                  {
+                    "$type": "ScriptData+CharacterRecordData, Assembly-CSharp",
+                    "name": "",
+                    "faceId": "00",
+                    "startingPos": 0,
+                    "endingPos": 0,
+                    "emoticon": -1,
+                    "action": 0,
+                    "effect": 0,
+                    "appear": 0,
+                    "shapeOverride": 0
+                  },
+                  {
+                    "$type": "ScriptData+CharacterRecordData, Assembly-CSharp",
+                    "name": "",
+                    "faceId": "00",
+                    "startingPos": 0,
+                    "endingPos": 0,
+                    "emoticon": -1,
+                    "action": 0,
+                    "effect": 0,
+                    "appear": 0,
+                    "shapeOverride": 0
+                  }
+                ]
+              },
+              "speakerSlotNum": 0,
+              "highlightedSlotNums": {
+                "$type": "System.Collections.Generic.List`1[[System.Int32, mscorlib]], mscorlib",
+                "$values": []
+              },
+              "isDialogScript": true,
+              "placeText": ""
+            }
+          ]
+        },
+        "NodeName": null,
+        "Guid": "e7812056-cfd7-5654-83dc-b312bec3f91f",
+        "ConnectionsTo": {
+          "$type": "System.Collections.Generic.List`1[[System.Guid, mscorlib]], mscorlib",
+          "$values": [
+            "55e23095-0dd5-5cae-a061-e192a401851b"
+          ]
+        },
+        "X": 0.0,
+        "Y": -295.952026
+      },
+      {
+        "$type": "ExitNodeData, Assembly-CSharp",
+        "IsEnding": false,
+        "EndText": "",
+        "NeHeader": "",
+        "NeTitle": "",
+        "NeScriptDirty": {
+          "$type": "ScriptData, Assembly-CSharp",
+          "text": "",
+          "popup": "",
+          "bgEffect": 0,
+          "bgName": 0,
+          "bgFriendlyName": "",
+          "sound": "",
+          "voice": "845ad67c-b6a8-5801-a6d8-3bb2b60d4d5a",
+          "transition": 0,
+          "bgmId": 0,
+          "selectionGroup": 0,
+          "additionalPrompt": "",
+          "characters": {
+            "$type": "System.Collections.Generic.List`1[[ScriptData+CharacterRecordData, Assembly-CSharp]], mscorlib",
+            "$values": [
+              {
+                "$type": "ScriptData+CharacterRecordData, Assembly-CSharp",
+                "name": "",
+                "faceId": "00",
+                "startingPos": 0,
+                "endingPos": 0,
+                "emoticon": -1,
+                "action": 0,
+                "effect": 0,
+                "appear": 0,
+                "shapeOverride": 0
+              },
+              {
+                "$type": "ScriptData+CharacterRecordData, Assembly-CSharp",
+                "name": "",
+                "faceId": "00",
+                "startingPos": 0,
+                "endingPos": 0,
+                "emoticon": -1,
+                "action": 0,
+                "effect": 0,
+                "appear": 0,
+                "shapeOverride": 0
+              },
+              {
+                "$type": "ScriptData+CharacterRecordData, Assembly-CSharp",
+                "name": "",
+                "faceId": "00",
+                "startingPos": 0,
+                "endingPos": 0,
+                "emoticon": -1,
+                "action": 0,
+                "effect": 0,
+                "appear": 0,
+                "shapeOverride": 0
+              },
+              {
+                "$type": "ScriptData+CharacterRecordData, Assembly-CSharp",
+                "name": "",
+                "faceId": "00",
+                "startingPos": 0,
+                "endingPos": 0,
+                "emoticon": -1,
+                "action": 0,
+                "effect": 0,
+                "appear": 0,
+                "shapeOverride": 0
+              },
+              {
+                "$type": "ScriptData+CharacterRecordData, Assembly-CSharp",
+                "name": "",
+                "faceId": "00",
+                "startingPos": 0,
+                "endingPos": 0,
+                "emoticon": -1,
+                "action": 0,
+                "effect": 0,
+                "appear": 0,
+                "shapeOverride": 0
+              },
+              {
+                "$type": "ScriptData+CharacterRecordData, Assembly-CSharp",
+                "name": "",
+                "faceId": "00",
+                "startingPos": 0,
+                "endingPos": 0,
+                "emoticon": -1,
+                "action": 0,
+                "effect": 0,
+                "appear": 0,
+                "shapeOverride": 0
+              }
+            ]
+          },
+          "speakerSlotNum": 0,
+          "highlightedSlotNums": {
+            "$type": "System.Collections.Generic.List`1[[System.Int32, mscorlib]], mscorlib",
+            "$values": []
+          },
+          "isDialogScript": false,
+          "placeText": ""
+        },
+        "Guid": "55e23095-0dd5-5cae-a061-e192a401851b",
+        "ConnectionsTo": {
+          "$type": "System.Collections.Generic.List`1[[System.Guid, mscorlib]], mscorlib",
+          "$values": []
+        },
+        "X": 0.0,
+        "Y": -566.790026
+      }
+    ]
+  }
+}

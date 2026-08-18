@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/aapforge/core-index.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "backgrounds", "sounds", "bgms", "characters"],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "backgrounds": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name"],
+        "properties": { "name": { "type": "string", "minLength": 1 } }
+      }
+    },
+    "sounds": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name"],
+        "properties": { "name": { "type": "string", "minLength": 1 } }
+      }
+    },
+    "bgms": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "verified"],
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string", "minLength": 1 },
+          "verified": { "type": "boolean" }
+        }
+      }
+    },
+    "characters": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "canonical_name",
+          "name",
+          "aliases",
+          "portrait_verified",
+          "spine_available",
+          "faces"
+        ],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "canonical_name": { "type": "string", "minLength": 1 },
+          "name": { "type": "string", "minLength": 1 },
+          "aliases": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "portrait_verified": { "type": "boolean" },
+          "spine_available": { "type": "boolean" },
+          "faces": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["id", "evidence"],
+              "properties": {
+                "id": { "type": "string", "minLength": 1 },
+                "evidence": { "enum": ["observed", "halocue"] }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

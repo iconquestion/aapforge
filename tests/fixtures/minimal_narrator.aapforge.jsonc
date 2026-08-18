@@ -1,0 +1,27 @@
+{
+  "aapforge": {
+    "schema_version": "1.0"
+  },
+
+  "project": {
+    "name": "Smoke"
+  },
+
+  "cast": {
+    "旁白": {
+      "narrator": true
+    }
+  },
+
+  "scenes": [
+    {
+      "id": "s1",
+      "lines": [
+        {
+          "speaker": "旁白",
+          "text": "Hello"
+        }
+      ]
+    }
+  ]
+}
