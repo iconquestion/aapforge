@@ -1,6 +1,23 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://example.invalid/aapforge/core-index.schema.json",
+  "$defs": {
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "source"],
+      "properties": {
+        "field": { "type": "string", "minLength": 1 },
+        "kind": { "enum": ["official", "observed", "derived"] },
+        "source": { "type": "string", "minLength": 1 }
+      }
+    },
+    "evidence_array": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/evidence" }
+    }
+  },
   "type": "object",
   "additionalProperties": false,
   "required": ["schema_version", "backgrounds", "sounds", "bgms", "characters"],
@@ -12,7 +29,11 @@
         "type": "object",
         "additionalProperties": false,
         "required": ["name"],
-        "properties": { "name": { "type": "string", "minLength": 1 } }
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "hash": { "type": "integer" },
+          "evidence": { "$ref": "#/$defs/evidence_array" }
+        }
       }
     },
     "sounds": {
@@ -69,10 +90,17 @@
               "required": ["id", "evidence"],
               "properties": {
                 "id": { "type": "string", "minLength": 1 },
-                "evidence": { "enum": ["observed", "halocue"] }
+                "label": { "type": "string" },
+                "evidence": {
+                  "oneOf": [
+                    { "enum": ["observed", "halocue"] },
+                    { "$ref": "#/$defs/evidence_array" }
+                  ]
+                }
               }
             }
-          }
+          },
+          "evidence": { "$ref": "#/$defs/evidence_array" }
         }
       }
     }

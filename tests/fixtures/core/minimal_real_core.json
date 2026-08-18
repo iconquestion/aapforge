@@ -1,0 +1,90 @@
+{
+  "schema_version": "1.0",
+  "backgrounds": [
+    {
+      "name": "BG_Black",
+      "hash": 1047754314,
+      "evidence": [
+        {
+          "field": "name",
+          "kind": "observed",
+          "source": "halocue:bg"
+        },
+        {
+          "field": "hash",
+          "kind": "derived",
+          "source": "aapforge:background_hash"
+        }
+      ]
+    },
+    {
+      "name": "BG_GameDevRoom",
+      "hash": 1194944144,
+      "evidence": [
+        {
+          "field": "name",
+          "kind": "observed",
+          "source": "halocue:bg"
+        },
+        {
+          "field": "hash",
+          "kind": "derived",
+          "source": "aapforge:background_hash"
+        }
+      ]
+    }
+  ],
+  "sounds": [],
+  "bgms": [],
+  "characters": [
+    {
+      "id": "Momoi",
+      "canonical_name": "桃井",
+      "name": "桃井",
+      "aliases": [],
+      "portrait_verified": true,
+      "spine_available": true,
+      "faces": [
+        {
+          "id": "00",
+          "label": "default",
+          "evidence": [
+            {
+              "field": "id",
+              "kind": "observed",
+              "source": "halocue:faces_used"
+            }
+          ]
+        },
+        {
+          "id": "03",
+          "label": "smile",
+          "evidence": [
+            {
+              "field": "id",
+              "kind": "observed",
+              "source": "halocue:faces_used"
+            }
+          ]
+        }
+      ],
+      "evidence": [
+        {
+          "field": "id",
+          "kind": "official",
+          "source": "halocue:official_flatdata"
+        },
+        {
+          "field": "name",
+          "kind": "official",
+          "source": "halocue:official_flatdata"
+        },
+        {
+          "field": "faces",
+          "kind": "observed",
+          "source": "halocue:faces_used"
+        }
+      ]
+    }
+  ]
+}

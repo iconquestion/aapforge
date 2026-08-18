@@ -1,0 +1,112 @@
+{
+  "_source": "fixture-aa-data-root",
+  "bg": {
+    "BG_Black": 1047754314,
+    "BG_GameDevRoom": 1194944144
+  },
+  "bg_conflict": [],
+  "sounds": [
+    "SE_Button_01"
+  ],
+  "characters": [
+    {
+      "identifier": "Momoi",
+      "name": "桃井",
+      "club": "GameDev",
+      "spine": "Momoi",
+      "avatar": "Momoi",
+      "source": "official_flatdata",
+      "faces": [
+        {
+          "id": "00",
+          "raw": "00",
+          "label": "default"
+        },
+        {
+          "id": "03",
+          "raw": "03",
+          "label": "smile"
+        }
+      ],
+      "spine_signature": "",
+      "outfit_key": "Momoi"
+    }
+  ],
+  "faces_used": {
+    "Momoi": [
+      {
+        "id": "00",
+        "raw": "00",
+        "label": "default"
+      },
+      {
+        "id": "03",
+        "raw": "03",
+        "label": "smile"
+      }
+    ]
+  },
+  "face_capabilities": {
+    "Momoi": [
+      {
+        "spine_signature": "",
+        "outfit_key": "Momoi",
+        "spine": "Momoi",
+        "faces": [
+          {
+            "id": "00",
+            "raw": "00",
+            "label": "default",
+            "cn": "",
+            "sources": [
+              "aap_observed"
+            ],
+            "observed_count": 2,
+            "verified": false
+          },
+          {
+            "id": "03",
+            "raw": "03",
+            "label": "smile",
+            "cn": "",
+            "sources": [
+              "aap_observed"
+            ],
+            "observed_count": 1,
+            "verified": false
+          }
+        ]
+      }
+    ]
+  },
+  "enums": {
+    "emoticon": {
+      "0": {
+        "sym": "[빠직]",
+        "cn": ""
+      },
+      "14": {
+        "sym": "{Bulb}",
+        "cn": ""
+      }
+    },
+    "action": {
+      "6": {
+        "verb": "jump",
+        "cn": ""
+      }
+    },
+    "appear": {
+      "3": {
+        "verb": "a",
+        "cn": ""
+      }
+    },
+    "shape": {
+      "4": {
+        "verb": "closeup",
+        "cn": ""
+      }
+    }
+  }
+}

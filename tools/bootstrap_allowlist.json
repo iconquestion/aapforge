@@ -1,0 +1,15 @@
+{
+  "backgrounds": [
+    "BG_Black",
+    "BG_GameDevRoom"
+  ],
+  "characters": [
+    "桃井"
+  ],
+  "faces": {
+    "桃井": [
+      "00",
+      "03"
+    ]
+  }
+}

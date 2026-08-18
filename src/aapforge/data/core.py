@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-ALLOWED_FACE_EVIDENCE = {"observed", "halocue"}
+ALLOWED_PROVENANCE_KINDS = {"official", "observed", "derived"}
 
 
 class CoreDataError(ValueError):
@@ -39,6 +39,12 @@ def validate_core_index(data: dict[str, Any]) -> None:
         if not isinstance(bgm.get("verified"), bool):
             raise CoreDataError("背景音乐 verified 字段必须是布尔值")
 
+    for background in data["backgrounds"]:
+        if "hash" in background and not isinstance(background["hash"], int):
+            raise CoreDataError("背景 hash 必须是整数")
+        if "evidence" in background:
+            _validate_evidence_list(background["evidence"], "background evidence")
+
     for character in data["characters"]:
         for field in ("id", "canonical_name", "name"):
             if not _non_empty_string(character.get(field)):
@@ -58,11 +64,19 @@ def validate_core_index(data: dict[str, Any]) -> None:
         _unique_field(faces, "id", f"faces for {character['id']}")
         if character["portrait_verified"] and not faces:
             raise CoreDataError("portrait_verified 为 true 的角色必须包含表情编号证据")
+        if "evidence" in character:
+            _validate_evidence_list(character["evidence"], "character evidence")
         for face in faces:
             if not _non_empty_string(face.get("id")):
                 raise CoreDataError("face id 必须是非空字符串")
-            if face.get("evidence") not in ALLOWED_FACE_EVIDENCE:
-                raise CoreDataError("face evidence 不在允许集合内")
+            if "label" in face and not isinstance(face["label"], str):
+                raise CoreDataError("face label 必须是字符串")
+            evidence = face.get("evidence")
+            if isinstance(evidence, str):
+                if evidence not in {"observed", "halocue"}:
+                    raise CoreDataError("face evidence 不在允许集合内")
+            else:
+                _validate_evidence_list(evidence, "face evidence")
 
 
 def _unique_named(items: list[dict[str, Any]], label: str) -> None:
@@ -76,6 +90,20 @@ def _unique_field(items: list[dict[str, Any]], field: str, label: str) -> None:
     values = [item.get(field) for item in items]
     if len(values) != len(set(values)):
         raise CoreDataError(f"{label} {field} 的值必须唯一")
+
+
+def _validate_evidence_list(items: Any, label: str) -> None:
+    if not isinstance(items, list) or not items:
+        raise CoreDataError(f"{label} 必须是非空证据数组")
+    for item in items:
+        if not isinstance(item, dict):
+            raise CoreDataError(f"{label} 的条目必须是对象")
+        if item.get("kind") not in ALLOWED_PROVENANCE_KINDS:
+            raise CoreDataError(f"{label} kind 不在允许集合内")
+        if not _non_empty_string(item.get("source")):
+            raise CoreDataError(f"{label} source 必须是非空字符串")
+        if "field" in item and not _non_empty_string(item["field"]):
+            raise CoreDataError(f"{label} field 必须是非空字符串")
 
 
 def _non_empty_string(value: object) -> bool:
