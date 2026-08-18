@@ -34,6 +34,7 @@ def normalize_character_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]
             key=lambda item: (
                 item["native_key"],
                 item["shape"],
+                item["club"],
                 item["spine"],
                 item["avatar"],
             ),
@@ -49,6 +50,7 @@ def normalize_character_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]
             {
                 "native_key": row["native_key"],
                 "shape": row["shape"],
+                "club": row["club"],
                 "spine": row["spine"],
                 "avatar": row["avatar"],
             }
@@ -123,6 +125,7 @@ def _normalize_row(row: dict[str, Any], index: int) -> dict[str, Any]:
         "name": name,
         "native_key": _require_int(row, "native_key", index),
         "shape": _require_int(row, "shape", index),
+        "club": _optional_string(row, "club", index),
         "spine": _optional_string(row, "spine", index),
         "avatar": _optional_string(row, "avatar", index),
     }
@@ -134,7 +137,8 @@ def _normalize_source(source: dict[str, Any]) -> dict[str, Any]:
     required = (
         "catalog_sha256",
         "bundle_name",
-        "bundle_content_hash",
+        "bundle_catalog_hash",
+        "bundle_cache_hash",
         "bundle_sha256",
     )
     normalized = {

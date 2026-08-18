@@ -38,7 +38,8 @@ py -3 -m pip install ".[extract]"
     "table": "ScenarioCharacterNameExcel",
     "catalog_sha256": "...",
     "bundle_name": "...",
-    "bundle_content_hash": "...",
+    "bundle_catalog_hash": "...",
+    "bundle_cache_hash": "...",
     "bundle_sha256": "..."
   },
   "characters": [
@@ -54,6 +55,7 @@ py -3 -m pip install ".[extract]"
         {
           "native_key": 123,
           "shape": 3,
+          "club": "對策委員會",
           "spine": "UIs/03_Scenario/02_Character/CharacterSpine_hoshino",
           "avatar": "UIs/01_Common/01_Character/NPC_Portrait_hoshino"
         }
@@ -82,12 +84,15 @@ py -3 -m pip install ".[extract]"
 ## 事实边界
 
 `ScenarioCharacterNameExcel` 能证明角色标识符、官方显示名称、官方多行记录、
-Spine 路径是否至少存在、头像路径、`native_key` 和 `shape`。它不能证明 faceId，
-因此 `faces` 必须保持为空，`portrait_verified` 必须保持 `false`。
+社团、Spine 路径是否至少存在、头像路径、`native_key` 和 `shape`。它不能证明
+faceId，因此 `faces` 必须保持为空，`portrait_verified` 必须保持 `false`。
 
 同一个角色标识符出现多条官方行时，全部保存到 `records`。这里不叫 `variants`，
 因为当前只能证明“官方表有多条记录”，还不能证明每条都等价于 AAPForge 可选择的
 立绘变体。
+
+`club` 保存在每条 `records` 中，不提升到角色顶层。当前没有充分证据证明同一个
+角色标识符的全部官方记录一定拥有相同社团。
 
 `spine_available` 使用确定性规则：
 

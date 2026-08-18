@@ -15,6 +15,14 @@ sys.path.insert(0, str(ROOT / "src"))
 from aapforge.data.aa_official import build_official_character_data
 
 
+class CharacterBundleNotFoundError(FileNotFoundError):
+    pass
+
+
+class CharacterBundleAmbiguousError(RuntimeError):
+    pass
+
+
 # HaloCue 已验证的 ScenarioCharacterNameExcel 文本解密 key。
 CHARACTER_NAME_KEY = bytes.fromhex("268bd50b5cce8633")
 CHARACTER_NAME_UINT_KEY = int.from_bytes(
@@ -109,7 +117,7 @@ def bundle_options_raw(raw: bytes, offset: int) -> dict[str, Any]:
 def locate_character_bundle(
     catalog_path: Path,
     cache_root: Path,
-) -> tuple[Path, str, str]:
+) -> tuple[Path, str, str, str]:
     """
     从 Addressables catalog 中找到
     scenariocharacternameexceltable.bytes
@@ -130,7 +138,7 @@ def locate_character_bundle(
         catalog["m_ExtraDataString"]
     )
 
-    matches: list[tuple[Path, str, str]] = []
+    matches: list[tuple[Path, str, str, str]] = []
 
     for internal_index, internal_id in enumerate(internal_ids):
 
@@ -163,19 +171,19 @@ def locate_character_bundle(
         )
 
         bundle_name = str(options["m_BundleName"])
-        content_hash = str(options["m_Hash"])
+        catalog_hash = str(options["m_Hash"])
 
         bundle_root = cache_root / bundle_name
 
         exact = (
             bundle_root
-            / content_hash
+            / catalog_hash
             / "__data"
         )
 
         if exact.is_file():
             matches.append(
-                (exact, bundle_name, content_hash)
+                (exact, bundle_name, catalog_hash, catalog_hash)
             )
             continue
 
@@ -191,17 +199,26 @@ def locate_character_bundle(
             if path.is_file()
         ]
 
+        if len(candidates) > 1:
+            paths = "\n".join(f"  {path}" for path in candidates)
+            raise CharacterBundleAmbiguousError(
+                "ScenarioCharacterNameExcel bundle 存在多个缓存 hash 候选，"
+                "拒绝自动选择：\n"
+                + paths
+            )
+
         if len(candidates) == 1:
             matches.append(
                 (
                     candidates[0],
                     bundle_name,
+                    catalog_hash,
                     candidates[0].parent.name,
                 )
             )
 
     if not matches:
-        raise FileNotFoundError(
+        raise CharacterBundleNotFoundError(
             "无法找到 ScenarioCharacterNameExcel bundle。\n"
             f"catalog: {catalog_path}\n"
             f"cache:   {cache_root}"
@@ -209,8 +226,8 @@ def locate_character_bundle(
 
     # 同一个表不能存在多个不同候选。
     unique = {
-        str(path.resolve()).casefold(): (path, name, h)
-        for path, name, h in matches
+        str(path.resolve()).casefold(): (path, name, catalog_hash, cache_hash)
+        for path, name, catalog_hash, cache_hash in matches
     }
 
     if len(unique) != 1:
@@ -218,7 +235,7 @@ def locate_character_bundle(
             f"  {item[0]}"
             for item in unique.values()
         )
-        raise RuntimeError(
+        raise CharacterBundleAmbiguousError(
             "发现多个 ScenarioCharacterNameExcel bundle，"
             "拒绝自动选择：\n"
             + paths
@@ -424,7 +441,7 @@ def locate_catalog(aa_root: Path) -> Path:
     return catalog
 
 
-def discover_cache(aa_root: Path) -> Path | None:
+def discover_cache_candidates(aa_root: Path) -> list[Path]:
     """
     尽量只用路径信息定位 AA 官方资源缓存。
 
@@ -510,6 +527,7 @@ def discover_cache(aa_root: Path) -> Path | None:
 
     seen: set[str] = set()
 
+    discovered: list[Path] = []
     for candidate in candidates:
         try:
             candidate = candidate.resolve()
@@ -528,6 +546,7 @@ def discover_cache(aa_root: Path) -> Path | None:
 
         # 简单验证 AA Addressables cache：
         # <bundle>/<hash>/__data
+        found_data = False
         for outer in candidate.iterdir():
             if not outer.is_dir():
                 continue
@@ -537,12 +556,72 @@ def discover_cache(aa_root: Path) -> Path | None:
                     data = inner / "__data"
 
                     if data.is_file():
-                        return candidate
+                        found_data = True
+                        break
 
             except OSError:
                 continue
+            if found_data:
+                discovered.append(candidate)
+                break
 
-    return None
+    return sorted(discovered, key=lambda path: str(path).casefold())
+
+
+def resolve_character_bundle_from_discovered_caches(
+    catalog_path: Path,
+    candidates: list[Path],
+    *,
+    locator=locate_character_bundle,
+) -> tuple[Path, Path, str, str, str]:
+    """用目标角色表验证自动发现的缓存候选。"""
+
+    valid: list[tuple[Path, Path, str, str, str]] = []
+    for cache_root in candidates:
+        try:
+            bundle_path, bundle_name, catalog_hash, cache_hash = locator(
+                catalog_path,
+                cache_root,
+            )
+        except CharacterBundleNotFoundError:
+            continue
+        valid.append((cache_root, bundle_path, bundle_name, catalog_hash, cache_hash))
+
+    if not candidates:
+        raise CharacterBundleNotFoundError("无法发现 AA Addressables 缓存")
+    if not valid:
+        raise CharacterBundleNotFoundError(
+            "发现了一些缓存候选，但没有任何一个能提供 ScenarioCharacterNameExcel"
+        )
+    if len(valid) > 1:
+        paths = "\n".join(f"  {item[0]}" for item in valid)
+        raise CharacterBundleAmbiguousError(
+            "多个缓存都能提供 ScenarioCharacterNameExcel，"
+            "请显式指定 --cache：\n"
+            + paths
+        )
+    return valid[0]
+
+
+def resolve_character_bundle_for_cli(
+    *,
+    catalog_path: Path,
+    aa_root: Path,
+    explicit_cache: Path | None,
+    locator=locate_character_bundle,
+    discoverer=discover_cache_candidates,
+) -> tuple[Path, Path, str, str, str]:
+    if explicit_cache is not None:
+        bundle_path, bundle_name, catalog_hash, cache_hash = locator(
+            catalog_path,
+            explicit_cache,
+        )
+        return explicit_cache, bundle_path, bundle_name, catalog_hash, cache_hash
+    return resolve_character_bundle_from_discovered_caches(
+        catalog_path,
+        discoverer(aa_root),
+        locator=locator,
+    )
 
 
 def sha256_file(path: Path) -> str:
@@ -616,27 +695,22 @@ def main() -> None:
             raise SystemExit(
                 f"--cache 目录不存在：{cache_root}"
             )
+        explicit_cache = cache_root
 
     else:
-        cache_root = discover_cache(aa_root)
+        explicit_cache = None
 
-        if cache_root is None:
-            raise SystemExit(
-                "无法自动找到 AA 官方资源缓存。\n\n"
-                "请重新运行并显式指定：\n"
-                '  --cache "你的资源文件目录"\n'
-            )
+    cache_root, bundle_path, bundle_name, catalog_hash, cache_hash = (
+        resolve_character_bundle_for_cli(
+            catalog_path=catalog_path,
+            aa_root=aa_root,
+            explicit_cache=explicit_cache,
+        )
+    )
 
     print(f"AA 安装目录：{aa_root}")
     print(f"catalog：     {catalog_path}")
     print(f"资源缓存：    {cache_root}")
-
-    bundle_path, bundle_name, content_hash = (
-        locate_character_bundle(
-            catalog_path,
-            cache_root,
-        )
-    )
 
     print(f"角色表 bundle：{bundle_path}")
 
@@ -658,7 +732,8 @@ def main() -> None:
         source={
             "catalog_sha256": sha256_file(catalog_path),
             "bundle_name": bundle_name,
-            "bundle_content_hash": content_hash,
+            "bundle_catalog_hash": catalog_hash,
+            "bundle_cache_hash": cache_hash,
             "bundle_sha256": sha256_file(bundle_path),
         },
     )
