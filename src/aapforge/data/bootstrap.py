@@ -108,7 +108,13 @@ def _build_characters(data: dict[str, Any], allowlist: dict[str, Any]) -> list[d
 
 def _build_character(data: dict[str, Any], row: dict[str, Any], face_ids: list[str]) -> dict[str, Any]:
     identifier = str(row["identifier"])
-    observed_faces = _observed_faces_for(data, identifier)
+    variants = _face_variants_for(data, identifier)
+    if len(variants) > 1 and face_ids:
+        raise BootstrapError(
+            "E_BOOTSTRAP_AMBIGUOUS_FACE_VARIANT",
+            f"角色身份已确认，但请求的表情无法唯一归属到具体立绘变体：{identifier}",
+        )
+    observed_faces = {} if len(variants) > 1 else _observed_faces_for(data, identifier)
     faces = []
     for face_id in face_ids:
         if face_id not in observed_faces:
@@ -158,6 +164,14 @@ def _build_character(data: dict[str, Any], row: dict[str, Any], face_ids: list[s
             },
         ],
     }
+
+
+def _face_variants_for(data: dict[str, Any], identifier: str) -> list[Any]:
+    capabilities = data.get("face_capabilities", {})
+    _assert_mapping(capabilities, "HaloCue face_capabilities")
+    variants = capabilities.get(identifier, [])
+    _assert_list(variants, f"HaloCue face_capabilities.{identifier}")
+    return variants
 
 
 def _observed_faces_for(data: dict[str, Any], identifier: str) -> dict[str, dict[str, Any]]:

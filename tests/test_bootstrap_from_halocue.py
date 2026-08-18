@@ -119,11 +119,34 @@ def test_character_with_multiple_variants_still_builds_identity_without_guessing
     variant = copy.deepcopy(source["face_capabilities"]["Momoi"][0])
     variant["outfit_key"] = "Momoi_Alt"
     source["face_capabilities"]["Momoi"].append(variant)
-    candidate = _candidate(source)
+    allowlist = _load(ALLOWLIST)
+    allowlist["faces"]["桃井"] = []
+    candidate = _candidate(source, allowlist)
     character = candidate["characters"][0]
     assert character["id"] == "Momoi"
+    assert character["faces"] == []
+    assert character["portrait_verified"] is False
     assert "outfit_key" not in character
     assert "spine" not in character
+
+
+def test_multiple_variants_reject_requested_face_without_unique_variant():
+    source = _load(HALOCUE_FIXTURE)
+    variant = copy.deepcopy(source["face_capabilities"]["Momoi"][0])
+    variant["outfit_key"] = "Momoi_Alt"
+    source["face_capabilities"]["Momoi"].append(variant)
+    allowlist = _load(ALLOWLIST)
+    allowlist["faces"]["桃井"] = ["03"]
+    with pytest.raises(BootstrapError) as error:
+        _candidate(source, allowlist)
+    assert error.value.code == "E_BOOTSTRAP_AMBIGUOUS_FACE_VARIANT"
+
+
+def test_single_variant_still_promotes_requested_observed_face():
+    candidate = _candidate()
+    character = candidate["characters"][0]
+    assert [face["id"] for face in character["faces"]] == ["00", "03"]
+    assert character["portrait_verified"] is True
 
 
 def test_spine_available_uses_actual_spine_field():

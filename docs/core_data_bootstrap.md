@@ -63,6 +63,11 @@ py -3 tools/bootstrap_from_halocue.py path\to\aa_resources.json
 对应角色标识符”；如果后续步骤需要选择具体立绘或表情变体，应在那个步骤再做
 唯一性检查，当前引导流程不能自动选择第一个变体。
 
+当同一角色标识符存在多个立绘变体时，`faces_used` 只视为标识符级观察汇总，
+不能提升为角色级已验证表情能力。此时如果白名单没有请求表情，候选角色的
+`faces` 保持为空且 `portrait_verified` 为 `false`；如果白名单请求表情，当前引导
+流程会以 `E_BOOTSTRAP_AMBIGUOUS_FACE_VARIANT` 失败，等待后续真正的变体选择阶段处理。
+
 ## 校验
 
 候选文件可以通过核心数据校验脚本检查：
