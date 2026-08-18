@@ -1,7 +1,7 @@
-"""AAPForge v1 GUID contract.
+"""AAPForge v1 Guid 契约。
 
-These identifiers mirror the HaloCue rule AAPForge v1 has chosen to freeze.
-They are not claimed to be a general AzureArchive protocol requirement.
+这些标识符遵循 AAPForge v1 选择冻结的 HaloCue 规则。
+这里不声明它们是 AzureArchive 协议本身的通用要求。
 """
 
 from __future__ import annotations

@@ -1,4 +1,4 @@
-"""Maintainer check for frozen M0 core data."""
+"""维护者用于检查 M0 冻结核心数据的脚本。"""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def main() -> int:
     load_core_index(ROOT / "resources/core/index.json")
     load_core_tables(ROOT / "resources/core/tables.json")
-    print("core data ok")
+    print("核心数据校验通过")
     return 0
 
 

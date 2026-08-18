@@ -1,8 +1,8 @@
 # AAPForge
 
-Deterministic AzureArchive `.aap` project generator.
+AAPForge 是确定性的 AzureArchive `.aap` 工程生成器。
 
-This repository currently contains the M0 contract/data freeze: AAPForge-owned
-core data, minimal `.aap` contract fixtures, and offline validation tests. It
-does not include a compiler frontend, writer, installer, or HaloCue runtime
-dependency.
+当前仓库只包含 M0：契约 / 数据冻结。这里保存 AAPForge 自己维护的核心数据、
+最小 `.aap` 契约样例和离线校验测试。
+
+当前不包含编译器前端、写出器、安装器，也不依赖 HaloCue 运行时代码。

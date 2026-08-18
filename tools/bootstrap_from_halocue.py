@@ -1,15 +1,14 @@
-"""Maintainer-only notes for HaloCue bootstrap.
+"""维护者专用的 HaloCue 引导说明。
 
-M0 data was manually frozen from explicit HaloCue modules and reviewed into
-AAPForge-owned JSON. This placeholder intentionally does not import HaloCue at
-runtime and does not scan local AA installs or user resource directories.
+M0 数据来自明确的 HaloCue 模块，经人工审查后写入 AAPForge 自有 JSON。
+这个占位工具刻意不导入 HaloCue 运行时代码，也不扫描本机 AA 安装或用户资源目录。
 """
 
 from __future__ import annotations
 
 
 def main() -> int:
-    print("No automatic bootstrap is defined for M0; review docs/aap_contract.md.")
+    print("M0 未定义自动引导流程；请查看 docs/aap_契约.md。")
     return 0
 
 

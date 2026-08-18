@@ -1,1 +1,1 @@
-"""AAPForge `.aap` contract helpers."""
+"""AAPForge `.aap` 契约辅助代码。"""

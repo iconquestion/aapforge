@@ -1,4 +1,4 @@
-"""Background hash contract frozen from HaloCue's verified implementation."""
+"""从 HaloCue 已验证实现冻结而来的背景哈希契约。"""
 
 from __future__ import annotations
 
