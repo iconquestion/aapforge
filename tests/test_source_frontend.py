@@ -7,6 +7,19 @@ import pytest
 
 from aapforge.input.diagnostics import SourceError
 from aapforge.input.loader import load_source_text
+from aapforge.ir.canonical import (
+    AaBackgroundRef,
+    AaSoundRef,
+    CanonicalLine,
+    CanonicalProject,
+    CanonicalScene,
+    CanonicalSource,
+    EnterOp,
+    ExitOp,
+    MoveOp,
+    SetFaceOp,
+    SilentBgmRef,
+)
 
 
 def _source():
@@ -20,6 +33,10 @@ def _source():
 
 def _load(data):
     return load_source_text(json.dumps(data, ensure_ascii=False)).to_dict()
+
+
+def _load_ir(data):
+    return load_source_text(json.dumps(data, ensure_ascii=False))
 
 
 def _fails(data, code: str = "E_SCHEMA"):
@@ -140,6 +157,14 @@ def test_resource_object_and_shorthand_produce_same_canonical_ir():
     assert _load(shorthand) == _load(obj)
 
 
+def test_bgm_999_and_silent_object_produce_same_canonical_ir():
+    shorthand = _source()
+    shorthand["scenes"][0]["lines"][0]["bgm"] = 999
+    obj = _source()
+    obj["scenes"][0]["lines"][0]["bgm"] = {"kind": "silent"}
+    assert _load(shorthand) == _load(obj)
+
+
 def test_bgm_unsupported_source_fails():
     data = _source()
     data["scenes"][0]["lines"][0]["bgm"] = {"kind": "asset", "type": "bgm", "id": "x"}
@@ -238,10 +263,12 @@ def test_line_invalid_ranges_fail(field, value):
 @pytest.mark.parametrize(
     "op",
     [
-        {"op": "enter", "actor": "桃井", "slot": 3, "from": "left"},
-        {"op": "exit", "actor": "桃井", "to": "right"},
+        {"op": "enter", "actor": "桃井", "slot": 3},
+        {"op": "enter", "actor": "桃井", "slot": 3, "from": "left", "face": 7},
+        {"op": "exit", "actor": "桃井", "slot": 3},
+        {"op": "exit", "actor": "桃井", "slot": 3, "to": "right"},
         {"op": "move", "actor": "桃井", "from": 3, "to": 1},
-        {"op": "set_face", "actor": "桃井", "face": 7},
+        {"op": "set_face", "actor": "桃井", "slot": 3, "face": 7},
     ],
 )
 def test_stage_ops_valid(op):
@@ -249,7 +276,13 @@ def test_stage_ops_valid(op):
     data["scenes"][0]["lines"][0]["stage_ops"] = [op]
     result = _load(data)
     stage_op = result["scenes"][0]["lines"][0]["stage_ops"][0]
-    if op["op"] == "set_face":
+    if op["op"] == "enter" and "from" not in op:
+        assert stage_op == {"op": "enter", "actor": "桃井", "slot": 3, "from": "center", "face": "00"}
+    elif op["op"] == "enter":
+        assert stage_op["face"] == "07"
+    elif op["op"] == "exit" and "to" not in op:
+        assert stage_op == {"op": "exit", "actor": "桃井", "slot": 3, "to": "center"}
+    elif op["op"] == "set_face":
         assert stage_op["face"] == "07"
     else:
         assert stage_op["op"] == op["op"]
@@ -258,10 +291,11 @@ def test_stage_ops_valid(op):
 @pytest.mark.parametrize(
     "op",
     [
-        {"op": "enter"},
-        {"op": "exit"},
+        {"op": "enter", "actor": "桃井"},
+        {"op": "exit", "actor": "桃井"},
         {"op": "move", "actor": "桃井", "from": 3},
-        {"op": "set_face", "actor": "桃井"},
+        {"op": "move", "actor": "桃井", "to": 1},
+        {"op": "set_face", "actor": "桃井", "face": "00"},
     ],
 )
 def test_stage_ops_missing_field_fails(op):
@@ -273,10 +307,10 @@ def test_stage_ops_missing_field_fails(op):
 @pytest.mark.parametrize(
     "op",
     [
-        {"op": "enter", "actor": "桃井", "extra": True},
-        {"op": "exit", "actor": "桃井", "extra": True},
+        {"op": "enter", "actor": "桃井", "slot": 3, "extra": True},
+        {"op": "exit", "actor": "桃井", "slot": 3, "extra": True},
         {"op": "move", "actor": "桃井", "from": 3, "to": 1, "extra": True},
-        {"op": "set_face", "actor": "桃井", "face": "00", "extra": True},
+        {"op": "set_face", "actor": "桃井", "slot": 3, "face": "00", "extra": True},
     ],
 )
 def test_stage_ops_unknown_field_fails(op):
@@ -285,14 +319,78 @@ def test_stage_ops_unknown_field_fails(op):
     _fails(data)
 
 
+@pytest.mark.parametrize("slot", [0, 6])
+def test_stage_ops_slot_range_fails(slot):
+    data = _source()
+    data["scenes"][0]["lines"][0]["stage_ops"] = [{"op": "enter", "actor": "桃井", "slot": slot}]
+    _fails(data)
+
+
+def test_enter_defaults_are_equivalent_to_explicit_values():
+    shorthand = _source()
+    shorthand["scenes"][0]["lines"][0]["stage_ops"] = [{"op": "enter", "actor": "桃井", "slot": 3}]
+    obj = _source()
+    obj["scenes"][0]["lines"][0]["stage_ops"] = [
+        {"op": "enter", "actor": "桃井", "slot": 3, "from": "center", "face": "00"}
+    ]
+    assert _load(shorthand) == _load(obj)
+
+
+def test_exit_defaults_are_equivalent_to_explicit_values():
+    shorthand = _source()
+    shorthand["scenes"][0]["lines"][0]["stage_ops"] = [{"op": "exit", "actor": "桃井", "slot": 3}]
+    obj = _source()
+    obj["scenes"][0]["lines"][0]["stage_ops"] = [{"op": "exit", "actor": "桃井", "slot": 3, "to": "center"}]
+    assert _load(shorthand) == _load(obj)
+
+
+def test_face_integer_and_string_produce_same_canonical_ir():
+    number = _source()
+    number["scenes"][0]["lines"][0]["face"] = 3
+    text = _source()
+    text["scenes"][0]["lines"][0]["face"] = "03"
+    assert _load(number) == _load(text)
+
+
+def test_canonical_ir_has_strong_types():
+    data = _source()
+    line = data["scenes"][0]["lines"][0]
+    line["bg"] = "BG_GameDevRoom"
+    line["se"] = "SE_Button_01"
+    line["bgm"] = 999
+    line["stage_ops"] = [
+        {"op": "enter", "actor": "桃井", "slot": 3},
+        {"op": "exit", "actor": "桃井", "slot": 3},
+        {"op": "move", "actor": "桃井", "from": 3, "to": 1},
+        {"op": "set_face", "actor": "桃井", "slot": 1, "face": 7},
+    ]
+    source = _load_ir(data)
+    assert isinstance(source, CanonicalSource)
+    assert isinstance(source.project, CanonicalProject)
+    assert isinstance(source.project.default_bg, AaBackgroundRef)
+    assert isinstance(source.project.default_bgm, SilentBgmRef)
+    assert isinstance(source.scenes[0], CanonicalScene)
+    assert isinstance(source.scenes[0].lines[0], CanonicalLine)
+    canonical_line = source.scenes[0].lines[0]
+    assert isinstance(canonical_line.bg, AaBackgroundRef)
+    assert isinstance(canonical_line.se, AaSoundRef)
+    assert isinstance(canonical_line.bgm, SilentBgmRef)
+    assert isinstance(canonical_line.stage_ops[0], EnterOp)
+    assert isinstance(canonical_line.stage_ops[1], ExitOp)
+    assert isinstance(canonical_line.stage_ops[2], MoveOp)
+    assert isinstance(canonical_line.stage_ops[3], SetFaceOp)
+
+
 def test_m1_does_not_resolve_unknown_actor_or_resource():
     data = _source()
     line = data["scenes"][0]["lines"][0]
     line["speaker"] = "完全不存在的角色"
     line["bg"] = {"kind": "aa", "name": "THIS_BACKGROUND_DOES_NOT_EXIST"}
+    line["bgm"] = {"kind": "aa", "id": 123456789}
     line["stage_ops"] = [{"op": "move", "actor": "不存在的人", "from": 1, "to": 2}]
     result = _load(data)
     line = result["scenes"][0]["lines"][0]
     assert line["speaker"] == "完全不存在的角色"
     assert line["bg"]["name"] == "THIS_BACKGROUND_DOES_NOT_EXIST"
+    assert line["bgm"] == {"kind": "aa", "id": 123456789}
     assert line["stage_ops"][0]["actor"] == "不存在的人"

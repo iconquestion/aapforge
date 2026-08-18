@@ -306,18 +306,20 @@ def _validate_stage_op(value: Any, *, file: str | None, path: str) -> None:
         _fail("E_SCHEMA", "stage_op 必须是对象", file=file, path=path)
     op = value.get("op")
     if op == "enter":
-        _require_keys(value, ("op", "actor"), file=file, path=path)
-        _check_unknown(value, {"op", "actor", "slot", "from"}, file=file, path=path)
+        _require_keys(value, ("op", "actor", "slot"), file=file, path=path)
+        _check_unknown(value, {"op", "actor", "slot", "from", "face"}, file=file, path=path)
         _validate_actor(value.get("actor"), file=file, path=f"{path}.actor")
-        if "slot" in value:
-            _validate_int_range(value["slot"], 1, 5, file=file, path=f"{path}.slot")
+        _validate_int_range(value.get("slot"), 1, 5, file=file, path=f"{path}.slot")
         if "from" in value:
             _validate_direction(value["from"], file=file, path=f"{path}.from")
+        if "face" in value:
+            _validate_face(value["face"], file=file, path=f"{path}.face")
         return
     if op == "exit":
-        _require_keys(value, ("op", "actor"), file=file, path=path)
-        _check_unknown(value, {"op", "actor", "to"}, file=file, path=path)
+        _require_keys(value, ("op", "actor", "slot"), file=file, path=path)
+        _check_unknown(value, {"op", "actor", "slot", "to"}, file=file, path=path)
         _validate_actor(value.get("actor"), file=file, path=f"{path}.actor")
+        _validate_int_range(value.get("slot"), 1, 5, file=file, path=f"{path}.slot")
         if "to" in value:
             _validate_direction(value["to"], file=file, path=f"{path}.to")
         return
@@ -329,9 +331,10 @@ def _validate_stage_op(value: Any, *, file: str | None, path: str) -> None:
         _validate_int_range(value.get("to"), 1, 5, file=file, path=f"{path}.to")
         return
     if op == "set_face":
-        _require_keys(value, ("op", "actor", "face"), file=file, path=path)
-        _check_unknown(value, {"op", "actor", "face"}, file=file, path=path)
+        _require_keys(value, ("op", "actor", "slot", "face"), file=file, path=path)
+        _check_unknown(value, {"op", "actor", "slot", "face"}, file=file, path=path)
         _validate_actor(value.get("actor"), file=file, path=f"{path}.actor")
+        _validate_int_range(value.get("slot"), 1, 5, file=file, path=f"{path}.slot")
         _validate_face(value.get("face"), file=file, path=f"{path}.face")
         return
     _fail("E_SCHEMA", "stage_ops.op 不合法", file=file, path=f"{path}.op")
