@@ -108,7 +108,6 @@ def _build_characters(data: dict[str, Any], allowlist: dict[str, Any]) -> list[d
 
 def _build_character(data: dict[str, Any], row: dict[str, Any], face_ids: list[str]) -> dict[str, Any]:
     identifier = str(row["identifier"])
-    _reject_ambiguous_variants(data, identifier)
     observed_faces = _observed_faces_for(data, identifier)
     faces = []
     for face_id in face_ids:
@@ -139,7 +138,7 @@ def _build_character(data: dict[str, Any], row: dict[str, Any], face_ids: list[s
         "name": str(row["name"]),
         "aliases": [],
         "portrait_verified": bool(faces),
-        "spine_available": True,
+        "spine_available": bool(row.get("spine")),
         "faces": faces,
         "evidence": [
             {
@@ -159,18 +158,6 @@ def _build_character(data: dict[str, Any], row: dict[str, Any], face_ids: list[s
             },
         ],
     }
-
-
-def _reject_ambiguous_variants(data: dict[str, Any], identifier: str) -> None:
-    capabilities = data.get("face_capabilities", {})
-    _assert_mapping(capabilities, "HaloCue face_capabilities")
-    variants = capabilities.get(identifier, [])
-    _assert_list(variants, f"HaloCue face_capabilities.{identifier}")
-    if len(variants) > 1:
-        raise BootstrapError(
-            "E_BOOTSTRAP_AMBIGUOUS_VARIANT",
-            f"角色存在多个立绘变体，不能自动冻结：{identifier}",
-        )
 
 
 def _observed_faces_for(data: dict[str, Any], identifier: str) -> dict[str, dict[str, Any]]:

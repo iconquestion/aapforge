@@ -16,8 +16,9 @@
 - `face_capabilities`：表情能力候选与观察证据；只有观察证据可以进入候选。
 - `enums`：HaloCue 侧枚举快照，仅用于和 `resources/core/tables.json` 交叉检查。
 
-输入中的 `_source`、`spine` 等路径线索不得写入输出。AAPForge 运行时也不得导入
-HaloCue 代码、扫描 AA 安装目录或读取用户素材。
+输入中的 `_source`、`spine` 等路径线索不得写入输出。`spine` 只用于派生
+`spine_available = bool(spine)`，不能因为角色来自官方表就默认有立绘。AAPForge
+运行时也不得导入 HaloCue 代码、扫描 AA 安装目录或读取用户素材。
 
 ## 白名单
 
@@ -57,6 +58,10 @@ py -3 tools/bootstrap_from_halocue.py path\to\aa_resources.json
 - 背景哈希与 `xxHash32:utf8:seed0` 契约不一致。
 - 表情只有候选证据，没有历史工程观察证据。
 - HaloCue 枚举快照与 `resources/core/tables.json` 冲突。
+
+多立绘变体不会让角色身份构建失败。身份解析只回答“这个显示名称是否能唯一
+对应角色标识符”；如果后续步骤需要选择具体立绘或表情变体，应在那个步骤再做
+唯一性检查，当前引导流程不能自动选择第一个变体。
 
 ## 校验
 

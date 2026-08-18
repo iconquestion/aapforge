@@ -96,14 +96,56 @@ def test_candidate_only_face_is_rejected():
     assert error.value.code == "E_BOOTSTRAP_FACE_NOT_OBSERVED"
 
 
-def test_multiple_character_variants_are_rejected():
+def test_character_without_face_variants_still_builds_identity():
+    source = _load(HALOCUE_FIXTURE)
+    source["face_capabilities"]["Momoi"] = []
+    candidate = _candidate(source)
+    character = candidate["characters"][0]
+    assert character["id"] == "Momoi"
+    assert "outfit_key" not in character
+    assert "variant" not in character
+
+
+def test_character_with_single_variant_still_builds_identity():
+    candidate = _candidate()
+    character = candidate["characters"][0]
+    assert character["id"] == "Momoi"
+    assert "outfit_key" not in character
+    assert "spine" not in character
+
+
+def test_character_with_multiple_variants_still_builds_identity_without_guessing():
     source = _load(HALOCUE_FIXTURE)
     variant = copy.deepcopy(source["face_capabilities"]["Momoi"][0])
     variant["outfit_key"] = "Momoi_Alt"
     source["face_capabilities"]["Momoi"].append(variant)
-    with pytest.raises(BootstrapError) as error:
-        _candidate(source)
-    assert error.value.code == "E_BOOTSTRAP_AMBIGUOUS_VARIANT"
+    candidate = _candidate(source)
+    character = candidate["characters"][0]
+    assert character["id"] == "Momoi"
+    assert "outfit_key" not in character
+    assert "spine" not in character
+
+
+def test_spine_available_uses_actual_spine_field():
+    with_spine = _candidate()
+    assert with_spine["characters"][0]["spine_available"] is True
+
+    source = _load(HALOCUE_FIXTURE)
+    source["characters"][0]["spine"] = ""
+    without_spine = _candidate(source)
+    assert without_spine["characters"][0]["spine_available"] is False
+
+
+def test_empty_faces_mean_unverified_not_absent():
+    source = _load(HALOCUE_FIXTURE)
+    source["faces_used"]["Momoi"] = []
+    allowlist = _load(ALLOWLIST)
+    allowlist["faces"]["桃井"] = []
+    candidate = _candidate(source, allowlist)
+    character = candidate["characters"][0]
+    assert character["faces"] == []
+    assert character["portrait_verified"] is False
+    assert character["spine_available"] is True
 
 
 def test_missing_observed_face_is_rejected():

@@ -13,10 +13,43 @@ class CoreDataError(ValueError):
     pass
 
 
+class CharacterNameNotFoundError(CoreDataError):
+    pass
+
+
+class CharacterNameAmbiguousError(CoreDataError):
+    pass
+
+
 def load_core_index(path: str | Path) -> dict[str, Any]:
     data = json.loads(Path(path).read_text(encoding="utf-8"))
     validate_core_index(data)
     return data
+
+
+def resolve_character_by_name(data: dict[str, Any], name: str) -> dict[str, Any]:
+    """按显示名称或别名解析角色，歧义时明确失败。"""
+
+    if not _non_empty_string(name):
+        raise CharacterNameNotFoundError("角色名称必须是非空字符串")
+    matches: dict[str, dict[str, Any]] = {}
+    for character in data.get("characters", []):
+        if not isinstance(character, dict):
+            continue
+        aliases = character.get("aliases", [])
+        if not isinstance(aliases, list):
+            aliases = []
+        names = {character.get("canonical_name"), character.get("name"), *aliases}
+        if name in names:
+            identifier = character.get("id")
+            if _non_empty_string(identifier):
+                matches[str(identifier)] = character
+    if not matches:
+        raise CharacterNameNotFoundError(f"未找到角色名称：{name}")
+    if len(matches) > 1:
+        ids = ", ".join(sorted(matches))
+        raise CharacterNameAmbiguousError(f"角色名称存在歧义：{name} -> {ids}")
+    return next(iter(matches.values()))
 
 
 def validate_core_index(data: dict[str, Any]) -> None:

@@ -5,7 +5,14 @@ from pathlib import Path
 
 import pytest
 
-from aapforge.data.core import CoreDataError, load_core_index, validate_core_index
+from aapforge.data.core import (
+    CharacterNameAmbiguousError,
+    CharacterNameNotFoundError,
+    CoreDataError,
+    load_core_index,
+    resolve_character_by_name,
+    validate_core_index,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -75,3 +82,52 @@ def test_duplicate_bgm_id_fails():
     ]
     with pytest.raises(CoreDataError):
         validate_core_index(data)
+
+
+def test_resolve_unique_character_name_passes():
+    data = load_core_index(ROOT / "resources/core/index.json")
+    data["characters"] = [
+        _character("alice", "Alice", aliases=["Alicia"]),
+        _character("bob", "Bob"),
+    ]
+    assert resolve_character_by_name(data, "Alice")["id"] == "alice"
+    assert resolve_character_by_name(data, "Alicia")["id"] == "alice"
+
+
+def test_resolve_missing_character_name_fails():
+    data = load_core_index(ROOT / "resources/core/index.json")
+    data["characters"] = [_character("alice", "Alice")]
+    with pytest.raises(CharacterNameNotFoundError):
+        resolve_character_by_name(data, "Carol")
+
+
+def test_resolve_ambiguous_character_name_fails():
+    data = load_core_index(ROOT / "resources/core/index.json")
+    data["characters"] = [
+        _character("alice-main", "Alice"),
+        _character("alice-alt", "Alice"),
+    ]
+    with pytest.raises(CharacterNameAmbiguousError):
+        resolve_character_by_name(data, "Alice")
+
+
+def test_resolve_alias_conflict_fails():
+    data = load_core_index(ROOT / "resources/core/index.json")
+    data["characters"] = [
+        _character("alice", "Alice", aliases=["Shared"]),
+        _character("bob", "Bob", aliases=["Shared"]),
+    ]
+    with pytest.raises(CharacterNameAmbiguousError):
+        resolve_character_by_name(data, "Shared")
+
+
+def _character(identifier: str, name: str, *, aliases: list[str] | None = None) -> dict:
+    return {
+        "id": identifier,
+        "canonical_name": name,
+        "name": name,
+        "aliases": aliases or [],
+        "portrait_verified": False,
+        "spine_available": False,
+        "faces": [],
+    }
