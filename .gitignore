@@ -5,6 +5,8 @@ __pycache__/
 venv/
 dist/
 build/
+resources/generated/*.json
+aa_official_core.json
 *.egg-info/
 .mypy_cache/
 .ruff_cache/
